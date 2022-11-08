@@ -295,6 +295,16 @@ class _HomeState extends State<Home> {
                       textScaleFactor: 1,
                     ),
                   ),
+                const VerticalSpaceHelper(height: 20),
+                if (isPressed &&
+                    success &&
+                    _batchContorller.text.isNotEmpty &&
+                    _subjectController.text.isNotEmpty)
+                  const Text(
+                    "Please don't close the app or change screen before the attendance is completed",
+                    textAlign: TextAlign.center,
+                    textScaleFactor: 1,
+                  ),
               ],
             ),
           ),

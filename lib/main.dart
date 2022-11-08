@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: "Attendance Teachers",
       theme: ThemeData(
         colorScheme: ColorScheme(
           brightness: Brightness.light,

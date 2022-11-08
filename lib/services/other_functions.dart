@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
@@ -87,7 +85,7 @@ class Functions {
   //     return;
   //   }
   //   formkey.currentState!.save();
-    
+
   // }
 
   Future<Map<String, dynamic>?> getData(
@@ -103,37 +101,6 @@ class Functions {
     return otp;
   }
 
-  Future<String> _determinePosition() async {
-    String currentAddress = "";
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      Fluttertoast.showToast(msg: "Please Enable your device location service");
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        Fluttertoast.showToast(msg: "Location Permission is denied");
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      Fluttertoast.showToast(msg: "Location Permission is denied forever");
-    }
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
-    );
-    try {
-      currentAddress =
-          "${(position.latitude * 1000).ceil()}, ${(position.longitude * 1000).ceil()}";
-      return currentAddress;
-    } catch (error) {
-      Fluttertoast.showToast(msg: "Failed to get current location");
-      return "No Location Available";
-    }
-  }
-
   Future<int> takeAttendance(
       {required String batch,
       required String subject,
@@ -147,12 +114,10 @@ class Functions {
     }
     formkey.currentState!.save();
     FocusScope.of(context).unfocus();
-    final location = await _determinePosition();
     final Map<String, dynamic> tempData = {
       "code": code,
       "hour": DateTime.now().hour.toString(),
       "minute": DateTime.now().minute.toString(),
-      "location": location,
     };
     await MongoDB.insert(batch, subject, tempData);
     return 0;
@@ -163,39 +128,55 @@ class Functions {
     await MongoDB.delete(code);
   }
 
-  Future<void> generateExcel(
+  Future<bool> generateExcel(
       {required BuildContext context,
       required GlobalKey<FormState> formkey,
       required String subject,
       required String batch}) async {
-    FocusScope.of(context).unfocus();
-    bool valid = formkey.currentState!.validate();
-    if (!valid) {
-      return;
+    try {
+      FocusScope.of(context).unfocus();
+      bool valid = formkey.currentState!.validate();
+      if (!valid) {
+        return false;
+      }
+      formkey.currentState!.save();
+      final result = await MongoDB.getAttendance(batch, subject);
+      final Workbook workbook = Workbook();
+      final Worksheet worksheet = workbook.worksheets[0];
+      List<String> dates = [];
+      for (var i = 0; i < result.length; i++) {
+        String date = result[i]["day"] +
+            "/" +
+            result[i]["month"] +
+            "/" +
+            result[i]["year"];
+        dates.add(date);
+      }
+      for (int i = 0; i < result.length; i++) {
+        final List? list = result[i]["attendance"];
+        worksheet.importList(dates, 1, i + 1, true);
+        worksheet.importList(list ?? [], 2, i + 1, true);
+        worksheet.autoFitColumn(i + 1);
+      }
+      final List<int> bytes = workbook.saveAsStream();
+      workbook.dispose();
+      final String path = (await getApplicationSupportDirectory()).path;
+      final String fileName =
+          "$path/Attendance_till_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().year}.xlsx";
+      final File file = File(fileName);
+      await file.writeAsBytes(bytes, flush: true);
+      OpenFile.open(fileName);
+      return true;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+            textScaleFactor: 1,
+          ),
+        ),
+      );
+      return false;
     }
-    formkey.currentState!.save();
-    final result = await MongoDB.getAttendance(batch, subject);
-    final Workbook workbook = Workbook();
-    final Worksheet worksheet = workbook.worksheets[0];
-    List<String> dates = [];
-    for (var i = 0; i < result.length; i++) {
-      String date =
-          result[i]["day"] + "/" + result[i]["month"] + "/" + result[i]["year"];
-      dates.add(date);
-    }
-    for (var i = 0; i < result.length; i++) {
-      final List<Object>? list = result[i]["attendance"];
-      worksheet.importList(dates, 1, i + 1, true);
-      // worksheet.importList(list!, 2, i + 1, true);
-      worksheet.autoFitColumn(i + 1);
-    }
-    final List<int> bytes = workbook.saveAsStream();
-    workbook.dispose();
-    final String path = (await getApplicationSupportDirectory()).path;
-    final String fileName =
-        "$path/Attendance_till_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().year}.xlsx";
-    final File file = File(fileName);
-    await file.writeAsBytes(bytes, flush: true);
-    OpenFile.open(fileName);
   }
 }

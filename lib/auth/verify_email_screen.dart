@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/home.dart';
 import '../utils/vertical_space_helper.dart';
+import './auth_screen.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   static const routeName = "/verify";
@@ -116,7 +117,14 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     ),
                     TextButton(
                       onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
+                        await FirebaseAuth.instance.signOut().then(
+                          (_) {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              AuthScreen.routeName,
+                              (route) => false,
+                            );
+                          },
+                        );
                       },
                       child: const Text(
                         "CHANGE EMAIL ID",

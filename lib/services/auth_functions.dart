@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../dbHelper/db_connection.dart';
-import '../auth/verify_email_screen.dart';
 
 class AuthFunctions {
   String? nameValidator(String name) {
@@ -32,22 +31,18 @@ class AuthFunctions {
     return null;
   }
 
-  Future<void> submitForm(GlobalKey<FormState> formkey, String name,
-      String email, String password, BuildContext context, bool isLogin) async {
+  Future<bool> submitForm(
+    String name,
+    String email,
+    String password,
+    BuildContext context,
+    bool isLogin,
+  ) async {
     FocusScope.of(context).unfocus();
     try {
-      bool valid = formkey.currentState!.validate();
-      if (!valid) {
-        return;
-      }
-      formkey.currentState!.save();
       if (isLogin) {
         await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password)
-            .then(
-              (_) => Navigator.of(context)
-                  .pushReplacementNamed(VerifyEmailScreen.routeName),
-            );
+            .signInWithEmailAndPassword(email: email, password: password);
       } else {
         await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
@@ -55,11 +50,9 @@ class AuthFunctions {
           "email": email,
           "name": name,
         };
-        await MongoDB.insertUser(data).then(
-          (_) => Navigator.of(context)
-              .pushReplacementNamed(VerifyEmailScreen.routeName),
-        );
+        await MongoDB.insertUser(data);
       }
+      return true;
     } on FirebaseAuthException catch (error) {
       var msg = "An Error Occurred! Please Try Again";
       if (error.code == "invalid-email") {
@@ -94,6 +87,7 @@ class AuthFunctions {
           );
         },
       );
+      return false;
     }
   }
 }

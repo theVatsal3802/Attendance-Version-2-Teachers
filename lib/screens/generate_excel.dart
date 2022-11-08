@@ -130,15 +130,20 @@ class _GenerateExcelState extends State<GenerateExcel> {
                       setState(() {
                         isLoading = true;
                       });
-                      await Functions().generateExcel(
+                      await Functions()
+                          .generateExcel(
                         context: context,
                         formkey: _formKey,
                         subject: _subjectController.text.trim().toUpperCase(),
                         batch: _batchController.text.trim().toUpperCase(),
+                      )
+                          .then(
+                        (value) {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        },
                       );
-                      setState(() {
-                        isLoading = false;
-                      });
                     },
                     child: const Text(
                       "Generate Excel Sheet",

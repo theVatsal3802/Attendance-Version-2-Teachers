@@ -96,7 +96,7 @@ class MongoDB {
     await tempCollection.remove(where.eq("code", code));
   }
 
-  static Future<Map<String, dynamic>?> getData(
+  static Future<Map<String, dynamic>?>  getData(
       String batch, String subject, String month, String day) async {
     var data = await collection.findOne(
       where
