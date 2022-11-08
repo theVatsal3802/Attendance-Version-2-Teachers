@@ -107,10 +107,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.all(10),
                       ),
-                      // validator: (value) {
-                      //   return AuthFunctions()
-                      //       .emailValidator(value!.trim().toLowerCase());
-                      // },
+                      validator: (value) {
+                        return AuthFunctions()
+                            .emailValidator(value!.trim().toLowerCase());
+                      },
                     ),
                   ),
                   const VerticalSpaceHelper(height: 20),
