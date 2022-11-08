@@ -3,15 +3,10 @@ import 'package:flutter/material.dart';
 import '../widgets/list_item.dart';
 import '../widgets/heading_text.dart';
 
-class SeeRecordsScreen extends StatefulWidget {
+class SeeRecordsScreen extends StatelessWidget {
   static const routeName = "/see-records";
   const SeeRecordsScreen({Key? key}) : super(key: key);
 
-  @override
-  State<SeeRecordsScreen> createState() => _SeeRecordsScreenState();
-}
-
-class _SeeRecordsScreenState extends State<SeeRecordsScreen> {
   @override
   Widget build(BuildContext context) {
     final data =

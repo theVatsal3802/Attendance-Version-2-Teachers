@@ -58,13 +58,18 @@ class Functions {
     return false;
   }
 
-  Future<void> seeRecords(BuildContext context, GlobalKey<FormState> formkey,
-      String batch, String subject, DateTime? date) async {
+  Future<Map<String, dynamic>> seeRecords(
+    BuildContext context,
+    GlobalKey<FormState> formkey,
+    String batch,
+    String subject,
+    DateTime? date,
+  ) async {
     FocusScope.of(context).unfocus();
     bool dateValid = await dateValidator(context, date.toString());
     bool valid = formkey.currentState!.validate();
     if (!valid && !dateValid) {
-      return;
+      return {};
     }
     formkey.currentState!.save();
     var result = await MongoDB.getData(
@@ -73,20 +78,8 @@ class Functions {
       date!.month.toString(),
       date.day.toString(),
     );
-    // return result;
+    return result ?? {};
   }
-
-  // Future<void> seeRecords(BuildContext context, GlobalKey<FormState> formkey,
-  //     String batch, String subject, DateTime? date) async {
-  //   FocusScope.of(context).unfocus();
-  //   bool dateValid = await dateValidator(context, date.toString());
-  //   bool valid = formkey.currentState!.validate();
-  //   if (!valid || !dateValid) {
-  //     return;
-  //   }
-  //   formkey.currentState!.save();
-
-  // }
 
   Future<Map<String, dynamic>?> getData(
       String batch, String subject, String month, String day) async {

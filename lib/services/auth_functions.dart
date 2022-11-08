@@ -73,7 +73,7 @@ class AuthFunctions {
               textScaleFactor: 1,
             ),
             content: Text(
-              error.toString(),
+              msg,
               textScaleFactor: 1,
             ),
             actions: [

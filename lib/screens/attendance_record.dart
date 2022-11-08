@@ -4,6 +4,7 @@ import '../widgets/custom_drawer.dart';
 import '../utils/vertical_space_helper.dart';
 import '../widgets/heading_text.dart';
 import '../services/other_functions.dart';
+import './see_records_screen.dart';
 
 class AttendanceRecordScreen extends StatefulWidget {
   static const routeName = "/attendance-record";
@@ -163,10 +164,14 @@ class _AttendanceRecordScreenState extends State<AttendanceRecordScreen> {
                         date,
                       )
                           .then(
-                        (_) {
+                        (value) {
                           setState(() {
                             isLoading = false;
                           });
+                          Navigator.of(context).pushNamed(
+                            SeeRecordsScreen.routeName,
+                            arguments: value,
+                          );
                         },
                       );
                     },

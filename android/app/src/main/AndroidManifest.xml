@@ -2,7 +2,7 @@
     package="com.example.attendance">
    <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="Attendance IIIT Kota Admin"
+        android:label="Attendance Teachers"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
